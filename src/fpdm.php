@@ -38,6 +38,8 @@ $FPDM_FILTERS=array(); //holds all supported filters
 $FPDM_REGEXPS= array(
 	//FIX: parse checkbox definition
 	"/AS"=>"/\/AS\s+\/(\w+)$/",
+	"/V"=>"/\/V\s+\/(\w+)$/",
+	"/DV"=>"/\/DV\s+\/(\w+)$/",
 	"name"=>"/\/(\w+)/",
 	// "/AP_D_SingleLine"=>"/\/D\s+\/(\w+)\s+\d+\s+\d+\s+R\s+\/(\w+)$/",
 	//ENDFIX
@@ -947,14 +949,16 @@ if (!call_user_func_array('class_exists', $__tmp)) {
                 if (isset($this->value_entries["$name"]["infos"]["checkbox_state_line"])
                 && isset($this->value_entries["$name"]["infos"]["checkbox_no"])
                 && isset($this->value_entries["$name"]["infos"]["checkbox_yes"])) {
+			
+                    $state = $this->value_entries["$name"]["infos"]["checkbox_no"];
+                    if ($value) {
+                        $state = $this->value_entries["$name"]["infos"]["checkbox_yes"];
+                    }
+			
                     $field_checkbox_line=$this->value_entries["$name"]["infos"]["checkbox_state_line"];
                     if ($field_checkbox_line) {
                         if ($verbose_set) {
                             echo "<br>Change checkbox of the field $name at line $field_checkbox_line to value [$value]";
-                        }
-                        $state = $this->value_entries["$name"]["infos"]["checkbox_no"];
-                        if ($value) {
-                            $state = $this->value_entries["$name"]["infos"]["checkbox_yes"];
                         }
                         $CurLine =$this->pdf_entries[$field_checkbox_line];
                         $OldLen=strlen($CurLine);
@@ -964,6 +968,26 @@ if (!call_user_func_array('class_exists', $__tmp)) {
                         $this->shift=$this->shift+$Shift;
                         //Saves
                         $this->pdf_entries[$field_checkbox_line]=$CurLine;
+                        if ($field_checkbox_line_v=$this->value_entries["$name"]["infos"]["checkbox_state_line_v"]) {
+                            $CurLine =$this->pdf_entries[$field_checkbox_line_v];
+                            $OldLen=strlen($CurLine);
+                            $CurLine = '/V /'.$state;
+                            $NewLen=strlen($CurLine);
+                            $Shift=$NewLen-$OldLen;
+                            $this->shift=$this->shift+$Shift;
+                            //Saves
+                            $this->pdf_entries[$field_checkbox_line_v]=$CurLine;
+                        }
+                        if ($field_checkbox_line_dv=$this->value_entries["$name"]["infos"]["checkbox_state_line_dv"]) {
+                            $CurLine =$this->pdf_entries[$field_checkbox_line_dv];
+                            $OldLen=strlen($CurLine);
+                            $CurLine = '/DV /'.$state;
+                            $NewLen=strlen($CurLine);
+                            $Shift=$NewLen-$OldLen;
+                            $this->shift=$this->shift+$Shift;
+                            //Saves
+                            $this->pdf_entries[$field_checkbox_line_dv]=$CurLine;
+                        }
                         return $Shift;
                     // $offset_shift=$this->_set_field_value($field_checkbox_line, $state);
                     } else {
@@ -1634,26 +1658,28 @@ if (!call_user_func_array('class_exists', $__tmp)) {
             $ap_line=0;
             $ap_d_line=0;
             $as='';
+            $v='';
+            $dv='';
             //ENDFIX
             $type='';
-			$subtype='';
-			$name='';
-			$value='';
-			$default_maxLen=0; //No limit
-			$default_tooltip_line=0; //Tooltip is optional as it may not be defined
-			$xref_table=0;
-			$trailer_table=0;
-			$n=0; //Position of an object, in the order it is declared in the pdf file
-			$stream=array();
-			$id_def=false; //true when parsing/decoding trailer ID
-			$id_single_line_def=false; //true when the two ID chunks are one the same line
-			$id_multi_line_def=false; //true or OpenOffice 3.2 
-			$creator='';
-			$producer='';
-			$creationDate='';
-			
-			$verbose_parsing=($this->verbose&&($this->verbose_level>3));
-			$verbose_decoding=($this->verbose&&($this->verbose_level>4));
+            $subtype='';
+            $name='';
+            $value='';
+            $default_maxLen=0; //No limit
+            $default_tooltip_line=0; //Tooltip is optional as it may not be defined
+            $xref_table=0;
+            $trailer_table=0;
+            $n=0; //Position of an object, in the order it is declared in the pdf file
+            $stream=array();
+            $id_def=false; //true when parsing/decoding trailer ID
+            $id_single_line_def=false; //true when the two ID chunks are one the same line
+            $id_multi_line_def=false; //true or OpenOffice 3.2 
+            $creator='';
+            $producer='';
+            $creationDate='';
+            
+            $verbose_parsing=($this->verbose&&($this->verbose_level>3));
+            $verbose_decoding=($this->verbose&&($this->verbose_level>4));
 			
             if($this->verbose) $this->dumpContent("Starting to parse $CountLines entries","PDF parse"); 
             
@@ -1666,19 +1692,19 @@ if (!call_user_func_array('class_exists', $__tmp)) {
 				
 					//Header of an object?
 					if(preg_match("/^(\d+) (\d+) obj/",$CurLine,$match)) {
-							$obj=intval($match[1]);
-							$this->offsets[$obj]=$this->pointer;
-							$this->positions[$obj]=$n;
-							$this->shifts[$n]=0;
-							$n++;
-							if($verbose_parsing) $this->dumpContent($CurLine,"====Opening object($obj) at line $Counter");
-							$object=array();
-							$object["values"]=array();
-							$object["constraints"]=array();
-							$object["constraints"]["maxlen"]=$default_maxLen;
-							$object["infos"]=array();
-							$object["infos"]["object"]=intval($obj);
-							$object["infos"]["tooltip"]=$default_tooltip_line; 
+                                            $obj=intval($match[1]);
+                                            $this->offsets[$obj]=$this->pointer;
+                                            $this->positions[$obj]=$n;
+                                            $this->shifts[$n]=0;
+                                            $n++;
+                                            if($verbose_parsing) $this->dumpContent($CurLine,"====Opening object($obj) at line $Counter");
+                                            $object=array();
+                                            $object["values"]=array();
+                                            $object["constraints"]=array();
+                                            $object["constraints"]["maxlen"]=$default_maxLen;
+                                            $object["infos"]=array();
+                                            $object["infos"]["object"]=intval($obj);
+                                            $object["infos"]["tooltip"]=$default_tooltip_line; 
 							
 					} else { 
 					
@@ -1717,6 +1743,8 @@ if (!call_user_func_array('class_exists', $__tmp)) {
 								$ap_line=0;
 								$ap_d_line=0;
 								$as='';
+								$v='';
+								$dv='';
 								//ENDFIX
 								$type='';
 								$subtype='';
@@ -1896,6 +1924,20 @@ if (!call_user_func_array('class_exists', $__tmp)) {
 											}
 											$object["infos"]["checkbox_state"]=$as;
 											$object["infos"]["checkbox_state_line"]=$Counter;
+										} elseif (($v=='')&&$this->extract_pdf_definition_value("/V", $CurLine, $match)) {
+											$v=$match[1];
+											if ($verbose_parsing) {
+												echo("<br>Object's V is '<i>$v</i>'");
+											}
+											$object["infos"]["checkbox_state_dv"]=$v;
+											$object["infos"]["checkbox_state_line_v"]=$Counter;
+										} elseif (($DV=='')&&$this->extract_pdf_definition_value("/DV", $CurLine, $match)) {
+											$dv=$match[1];
+											if ($verbose_parsing) {
+												echo("<br>Object's DV is '<i>$DV</i>'");
+											}
+											$object["infos"]["checkbox_state_dv"]=$dv;
+											$object["infos"]["checkbox_state_line_dv"]=$Counter;
 										}
 									}
 									//ENDFIX
