@@ -1917,6 +1917,7 @@ if (!call_user_func_array('class_exists', $__tmp)) {
 												$object["infos"]["checkbox_no"]=$ap_d_second;
 											}
 										}
+									}
 									} elseif (($as=='')&&$this->extract_pdf_definition_value("/AS", $CurLine, $match)) {
 										$as=$match[1];
 											if ($verbose_parsing) {
