@@ -1846,36 +1846,57 @@ if (!call_user_func_array('class_exists', $__tmp)) {
 									$match=array();
 									//FIX: parse checkbox definition
 									if($this->useCheckboxParser && ('' == $ap_d_yes || '' == $ap_d_no || '' == $as)) {
-                                        if (!$ap_line && '/AP' == substr($CurLine, 0, 3)) {
-                                            if ($verbose_parsing) {
-                                                echo("<br>Found AP Line '<i>$Counter</i>'");
-                                            }
-                                            $ap_line = $Counter;
-                                        } elseif (!$ap_d_line && '/D' == substr($CurLine, 0, 2)) {
-                                            if ($verbose_parsing) {
-                                                echo("<br>Found D Line '<i>$Counter</i>'");
-                                            }
-                                            $ap_d_line = $Counter;
-                                        } elseif (($ap_line==$Counter-4)&&($ap_d_line==$Counter-2)&&($ap_d_yes=='')&&$this->extract_pdf_definition_value("name", $CurLine, $match)) {
-                                            $ap_d_yes=$match[1];
-                                            if ($verbose_parsing) {
-                                                echo("<br>Object's checkbox_yes is '<i>$ap_d_yes</i>'");
-                                            }
-                                            $object["infos"]["checkbox_yes"]=$ap_d_yes;
-                                        } elseif (($ap_line==$Counter-5)&&($ap_d_line==$Counter-3)&&($ap_d_no=='')&&$this->extract_pdf_definition_value("name", $CurLine, $match)) {
-                                            $ap_d_no=$match[1];
-                                            if ($verbose_parsing) {
-                                                echo("<br>Object's checkbox_no is '<i>$ap_d_no</i>'");
-                                            }
-                                            $object["infos"]["checkbox_no"]=$ap_d_no;
-                                        } elseif (($as=='')&&$this->extract_pdf_definition_value("/AS", $CurLine, $match)) {
-                                            $as=$match[1];
-                                            if ($verbose_parsing) {
-                                                echo("<br>Object's AS is '<i>$as</i>'");
-                                            }
-                                            $object["infos"]["checkbox_state"]=$as;
-                                            $object["infos"]["checkbox_state_line"]=$Counter;
-                                        }
+										if (!$ap_line && '/AP' == substr($CurLine, 0, 3)) {
+											if ($verbose_parsing) {
+											echo("<br>Found AP Line '<i>$Counter</i>'");
+											}
+											$ap_line = $Counter;
+										} elseif (!$ap_d_line && '/D' == substr($CurLine, 0, 2)) {
+											if ($verbose_parsing) {
+											echo("<br>Found D Line '<i>$Counter</i>'");
+											}
+											$ap_d_line = $Counter;
+										} elseif (($ap_line==$Counter-4)&&($ap_d_line==$Counter-2)&&$this->extract_pdf_definition_value("name", $CurLine, $match)) {
+											$ap_d_first=$match[1];
+											if($ap_d_first!="Off") {
+											if ($verbose_parsing) {
+												echo("<br>Object's checkbox_yes is '<i>$ap_d_first</i>'");
+											}
+											$ap_d_yes=$ap_d_first;
+											$object["infos"]["checkbox_yes"]=$ap_d_first;
+											}
+											else {
+											if ($verbose_parsing) {
+												echo("<br>Object's checkbox_no is '<i>$ap_d_first</i>'");
+											}
+											$ap_d_no=$ap_d_first;
+											$object["infos"]["checkbox_no"]=$ap_d_first;
+											}
+										} elseif (($ap_line==$Counter-5)&&($ap_d_line==$Counter-3)&&$this->extract_pdf_definition_value("name", $CurLine, $match)) {
+											$ap_d_second=$match[1];
+											if($ap_d_second!="Off") {
+											if ($verbose_parsing) {
+												echo("<br>Object's checkbox_yes is '<i>$ap_d_second</i>'");
+											}
+											$ap_d_yes=$ap_d_second;
+											$object["infos"]["checkbox_yes"]=$ap_d_second;
+											}
+												else {
+												if ($verbose_parsing) {
+													echo("<br>Object's checkbox_no is '<i>$ap_d_second</i>'");
+												}
+												$ap_d_no=$ap_d_second;
+												$object["infos"]["checkbox_no"]=$ap_d_second;
+											}
+										}
+									} elseif (($as=='')&&$this->extract_pdf_definition_value("/AS", $CurLine, $match)) {
+										$as=$match[1];
+											if ($verbose_parsing) {
+												echo("<br>Object's AS is '<i>$as</i>'");
+											}
+											$object["infos"]["checkbox_state"]=$as;
+											$object["infos"]["checkbox_state_line"]=$Counter;
+										}
 									}
 									//ENDFIX
 									if(($type=='')||($subtype=='')||($name=="")) {
@@ -1895,7 +1916,7 @@ if (!call_user_func_array('class_exists', $__tmp)) {
 											
 										}
 										if(($name=="")&&preg_match("/^\/T\s?\((.+)\)\s*$/",$this->_protectContentValues($CurLine),$match)) {
-								
+											
 											$name=$this->_unprotectContentValues($match[1]);
 											//FIX: convert ASCII object names to utf-8
 											// don't use utf8_encode($name) yet, it's core function since php 7.2
