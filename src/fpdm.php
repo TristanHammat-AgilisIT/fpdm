@@ -968,7 +968,8 @@ if (!call_user_func_array('class_exists', $__tmp)) {
 						$this->shift=$this->shift+$Shift;
 						//Saves
 						$this->pdf_entries[$field_checkbox_line]=$CurLine;
-						if ($field_checkbox_line_v=$this->value_entries["$name"]["infos"]["checkbox_state_line_v"]) {
+						if (isset($this->value_entries["$name"]["infos"]["checkbox_state_line_v"]) && 
+						    $field_checkbox_line_v=$this->value_entries["$name"]["infos"]["checkbox_state_line_v"]) {
 							$CurLine =$this->pdf_entries[$field_checkbox_line_v];
 							$OldLen=strlen($CurLine);
 							$CurLine = '/V /'.$state;
@@ -978,7 +979,8 @@ if (!call_user_func_array('class_exists', $__tmp)) {
 							//Saves
 							$this->pdf_entries[$field_checkbox_line_v]=$CurLine;
 						}
-						if ($field_checkbox_line_dv=$this->value_entries["$name"]["infos"]["checkbox_state_line_dv"]) {
+						if (isset($this->value_entries["$name"]["infos"]["checkbox_state_line_dv"]) && 
+						    $field_checkbox_line_dv=$this->value_entries["$name"]["infos"]["checkbox_state_line_dv"]) {
 							$CurLine =$this->pdf_entries[$field_checkbox_line_dv];
 							$OldLen=strlen($CurLine);
 							$CurLine = '/DV /'.$state;
