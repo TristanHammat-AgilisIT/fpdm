@@ -1930,7 +1930,7 @@ if (!call_user_func_array('class_exists', $__tmp)) {
 											}
 											$object["infos"]["checkbox_state_dv"]=$v;
 											$object["infos"]["checkbox_state_line_v"]=$Counter;
-										} elseif (($DV=='')&&$this->extract_pdf_definition_value("/DV", $CurLine, $match)) {
+										} elseif (($dv=='')&&$this->extract_pdf_definition_value("/DV", $CurLine, $match)) {
 											$dv=$match[1];
 											if ($verbose_parsing) {
 												echo("<br>Object's DV is '<i>$dv</i>'");
